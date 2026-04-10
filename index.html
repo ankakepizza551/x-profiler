@@ -2,8 +2,8 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pop Profile Card Maker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pop Profile Card Maker Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -12,62 +12,79 @@
             --accent-orange: #ff9f43;
             --accent-purple: #5f27cd;
             --accent-green: #10ac84;
+            --bg-color: #f0f2f5;
         }
 
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background-color: #f0f2f5;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 40px;
-            margin: 0;
         }
 
-        /* 入力フォームのスタイル */
+        /* --- エディタ（入力フォーム）のレスポンシブ設定 --- */
         .editor-container {
             background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
             margin-bottom: 30px;
-            width: 800px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
+            width: 100%;
+            max-width: 800px; /* PCではこの幅 */
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
             gap: 15px;
         }
 
-        .editor-container input, .editor-container textarea {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
+        .input-group {
+            display: flex;
+            gap: 10px;
         }
 
-        .full-width { grid-column: span 2; }
+        .input-group input { flex: 1; }
+
+        input, textarea {
+            padding: 12px 15px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 16px; /* スマホでズームされないサイズ */
+            transition: border-color 0.2s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #333;
+        }
 
         .btn-download {
-            grid-column: span 2;
             background: #333;
             color: white;
-            padding: 12px;
+            padding: 15px;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 18px;
+            margin-top: 10px;
         }
 
         .btn-download:hover { background: #000; }
 
-        /* カードのプレビュー（16:9比率を保つための縮小表示） */
-        .preview-scale {
-            transform: scale(0.5); /* 画面に収まるよう半分に縮小表示 */
-            transform-origin: top center;
-            margin-bottom: -450px; /* 縮小による余白調整 */
+        /* --- プレビューエリア（スマホ対応の要） --- */
+        .preview-stage {
+            width: 100%;
+            max-width: 1600px; /* カードの本来の幅 */
+            overflow: hidden; /* はみ出しを防ぐ */
+            display: flex;
+            justify-content: center;
+            margin-bottom: 50px;
         }
 
-        /* カード本体のスタイル */
+        /* カード本体（1600x900px固定） */
         #card-capture {
             width: 1600px;
             height: 900px;
@@ -77,9 +94,10 @@
             padding: 80px;
             box-sizing: border-box;
             position: relative;
-            overflow: hidden;
+            flex-shrink: 0; /* 縮小されないように */
         }
 
+        /* --- カード内部のレイアウト --- */
         .left-panel {
             flex: 1;
             display: flex;
@@ -93,13 +111,14 @@
             margin-bottom: 40px;
         }
 
-        .icon-circle {
+        #out-icon {
             width: 180px;
             height: 180px;
             background: #fff;
             border: 10px solid #ffeb3b;
             border-radius: 50%;
             margin-right: 30px;
+            object-fit: cover; /* 画像を枠に収める */
         }
 
         .name-text { font-size: 80px; font-weight: 900; margin: 0; color: #333; }
@@ -145,35 +164,48 @@
         .item-title { font-size: 36px; font-weight: bold; margin: 0; }
         .item-desc { font-size: 24px; color: #777; margin: 5px 0 0 0; }
 
-        /* 装飾 */
         .deco { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.4); z-index: 0; }
     </style>
 </head>
 <body>
 
     <div class="editor-container">
-        <input type="text" id="in-name" placeholder="名前" value="クリエイター名">
-        <input type="text" id="in-id" placeholder="ID (例: @username)" value="@handle_id">
-        <textarea id="in-about" class="full-width" rows="3" placeholder="自己紹介文">DTMでの楽曲制作や、
-ストック音楽の販売をメインに活動中。
-お気軽に話しかけてください！</textarea>
-        <input type="text" id="in-t1" placeholder="活動1" value="DTM / 楽曲制作">
-        <input type="text" id="in-d1" placeholder="詳細1" value="Audiostock等で公開中">
-        <input type="text" id="in-t2" placeholder="活動2" value="GAME">
-        <input type="text" id="in-d2" placeholder="詳細2" value="非想天則 / 格ゲー">
-        <input type="text" id="in-t3" placeholder="活動3" value="PORTFOLIO">
-        <input type="text" id="in-d3" placeholder="詳細3" value="過去の作品集はこちら">
+        <div class="input-group">
+            <input type="text" id="in-x-id" placeholder="XのID（@なし）を入力してアイコン取得">
+            <button type="button" onclick="loadXIcon()" style="padding: 10px 20px; border-radius:10px; border:1px solid #ccc; cursor:pointer;">取得</button>
+        </div>
+        <hr style="width:100%; border:0; border-top:1px solid #eee; margin:10px 0;">
+
+        <div class="input-group">
+            <input type="text" id="in-name" placeholder="名前" value="クリエイター名">
+            <input type="text" id="in-id" placeholder="ID (例: @username)" value="@handle_id">
+        </div>
+        <textarea id="in-about" class="full-width" rows="3" placeholder="自己紹介文">ここに自己紹介を記入します。
+スマホからも簡単に編集できます！
+お気軽にフォローしてください。</textarea>
+        <div class="input-group">
+            <input type="text" id="in-t1" placeholder="活動1" value="DTM / 楽曲制作">
+            <input type="text" id="in-d1" placeholder="詳細1" value="楽曲公開中">
+        </div>
+        <div class="input-group">
+            <input type="text" id="in-t2" placeholder="活動2" value="GAME">
+            <input type="text" id="in-d2" placeholder="詳細2" value="格ゲー / DTM">
+        </div>
+        <div class="input-group">
+            <input type="text" id="in-t3" placeholder="活動3" value="PORTFOLIO">
+            <input type="text" id="in-d3" placeholder="詳細3" value="作品集はこちら">
+        </div>
         <button class="btn-download" onclick="saveImage()">画像を保存する</button>
     </div>
 
-    <div class="preview-scale">
+    <div class="preview-stage">
         <div id="card-capture">
             <div class="deco" style="width:200px; height:200px; top:-50px; left:-50px;"></div>
             <div class="deco" style="width:150px; height:150px; bottom:100px; right:100px;"></div>
             
             <div class="left-panel">
                 <div class="profile-header">
-                    <div class="icon-circle"></div>
+                    <img src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23ccc'><circle cx='50' cy='50' r='50'/></svg>" id="out-icon">
                     <div>
                         <p class="name-text" id="out-name"></p>
                         <p class="id-text" id="out-id"></p>
@@ -209,7 +241,45 @@
     </div>
 
     <script>
-        // 入力値をリアルタイムで反映させる
+        // --- 1. レスポンシブ・プレビュー（スマホ対応の核心） ---
+        const stage = document.querySelector('.preview-stage');
+        const card = document.getElementById('card-capture');
+        const CARD_WIDTH = 1600; // カード本来の幅
+
+        function adjustScale() {
+            // 親要素（画面幅）とカード幅の比率を計算
+            const scale = stage.offsetWidth / CARD_WIDTH;
+            // 1倍（PC）より大きくはしない、スマホでは縮小
+            const finalScale = Math.min(scale, 1);
+            
+            card.style.transform = `scale(${finalScale})`;
+            card.style.transformOrigin = 'top left'; // 左上を基準に縮小
+
+            // 縮小によって生じる下の余白を調整
+            const scaledHeight = 900 * finalScale;
+            stage.style.height = scaledHeight + 'px';
+        }
+
+        window.addEventListener('load', adjustScale);
+        window.addEventListener('resize', adjustScale); // 画面サイズ変更時に再計算
+
+        // --- 2. Xアイコン取得機能 ---
+        function loadXIcon() {
+            const username = document.getElementById('in-x-id').value;
+            if (!username) return alert('XのIDを入力してください');
+
+            // 外部サービスを使ってアイコンを取得（CORS回避のためプロキシを利用）
+            const iconUrl = `https://unavatar.io/twitter/${username}`;
+            const iconImg = document.getElementById('out-icon');
+
+            // 画像の読み込み（html2canvasで扱えるようにCORS設定）
+            iconImg.crossOrigin = "Anonymous"; 
+            iconImg.src = iconUrl;
+            iconImg.onload = () => { console.log('Icon loaded'); };
+            iconImg.onerror = () => { alert('アイコンの取得に失敗しました。IDを確認してください。'); };
+        }
+
+        // --- 3. 入力リアルタイム反映 ---
         const inputs = ['name', 'id', 'about', 't1', 'd1', 't2', 'd2', 't3', 'd3'];
         
         function updatePreview() {
@@ -222,17 +292,38 @@
             document.getElementById('in-' + id).addEventListener('input', updatePreview);
         });
 
-        // 画像保存
+        // --- 4. 画像保存 ---
         function saveImage() {
             const target = document.getElementById("card-capture");
+            // スマホでのズレを防ぐため、html2canvas実行時は一時的にscaleを1に戻す
+            const currentTransform = card.style.transform;
+            card.style.transform = 'scale(1)';
+
             html2canvas(target, {
-                scale: 1, // 高解像度で書き出し
-                useCORS: true
+                scale: 1, // 高解像度（1倍 = 1600px幅）で書き出し
+                useCORS: true, // 外部アイコンを画像に含める
+                allowTaint: false,
+                backgroundColor: null, // 背景を透明に
             }).then(canvas => {
+                // 保存用のリンクを作成
                 const link = document.createElement("a");
-                link.download = "profile-card.png";
+                link.download = `profile-card-${document.getElementById('in-x-id').value || 'creator'}.png`;
                 link.href = canvas.toDataURL("image/png");
-                link.click();
+                
+                // スマホ（特にiOS）では、aタグのclick()が効かない場合があるため、
+                // 生成した画像を別タブで開くか、ダウンロードリンクを表示するのが安全
+                if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
+                    // スマホの場合は新しいタブで画像を開き、長押し保存を促す
+                    const imgWin = window.open("");
+                    imgWin.document.write('<img src="' + link.href + '" style="width:100%;" />');
+                    imgWin.document.title = "画像を長押しして保存してください";
+                } else {
+                    // PCはそのままダウンロード
+                    link.click();
+                }
+
+                // プレビューの縮小を元に戻す
+                card.style.transform = currentTransform;
             });
         }
 
