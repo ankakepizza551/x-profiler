@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pop Profile Card Maker</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --pop-blue: #a1ffce;
+            --pop-yellow: #faffd1;
+            --accent-orange: #ff9f43;
+            --accent-purple: #5f27cd;
+            --accent-green: #10ac84;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px;
+            margin: 0;
+        }
+
+        /* 入力フォームのスタイル */
+        .editor-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            width: 800px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .editor-container input, .editor-container textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .full-width { grid-column: span 2; }
+
+        .btn-download {
+            grid-column: span 2;
+            background: #333;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .btn-download:hover { background: #000; }
+
+        /* カードのプレビュー（16:9比率を保つための縮小表示） */
+        .preview-scale {
+            transform: scale(0.5); /* 画面に収まるよう半分に縮小表示 */
+            transform-origin: top center;
+            margin-bottom: -450px; /* 縮小による余白調整 */
+        }
+
+        /* カード本体のスタイル */
+        #card-capture {
+            width: 1600px;
+            height: 900px;
+            background: linear-gradient(135deg, var(--pop-blue) 0%, var(--pop-yellow) 100%);
+            border-radius: 40px;
+            display: flex;
+            padding: 80px;
+            box-sizing: border-box;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .left-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            z-index: 1;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .icon-circle {
+            width: 180px;
+            height: 180px;
+            background: #fff;
+            border: 10px solid #ffeb3b;
+            border-radius: 50%;
+            margin-right: 30px;
+        }
+
+        .name-text { font-size: 80px; font-weight: 900; margin: 0; color: #333; }
+        .id-text { font-size: 40px; color: #666; margin: 0; }
+
+        .about-text {
+            font-size: 38px;
+            line-height: 1.5;
+            color: #444;
+            margin-top: 30px;
+            white-space: pre-wrap;
+        }
+
+        .right-panel {
+            width: 650px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
+            z-index: 1;
+        }
+
+        .item {
+            background: white;
+            padding: 30px;
+            border-radius: 30px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        }
+
+        .item-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 20px;
+            margin-right: 25px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            color: white;
+        }
+
+        .item-title { font-size: 36px; font-weight: bold; margin: 0; }
+        .item-desc { font-size: 24px; color: #777; margin: 5px 0 0 0; }
+
+        /* 装飾 */
+        .deco { position: absolute; border-radius: 50%; background: rgba(255,255,255,0.4); z-index: 0; }
+    </style>
+</head>
+<body>
+
+    <div class="editor-container">
+        <input type="text" id="in-name" placeholder="名前" value="クリエイター名">
+        <input type="text" id="in-id" placeholder="ID (例: @username)" value="@handle_id">
+        <textarea id="in-about" class="full-width" rows="3" placeholder="自己紹介文">DTMでの楽曲制作や、
+ストック音楽の販売をメインに活動中。
+お気軽に話しかけてください！</textarea>
+        <input type="text" id="in-t1" placeholder="活動1" value="DTM / 楽曲制作">
+        <input type="text" id="in-d1" placeholder="詳細1" value="Audiostock等で公開中">
+        <input type="text" id="in-t2" placeholder="活動2" value="GAME">
+        <input type="text" id="in-d2" placeholder="詳細2" value="非想天則 / 格ゲー">
+        <input type="text" id="in-t3" placeholder="活動3" value="PORTFOLIO">
+        <input type="text" id="in-d3" placeholder="詳細3" value="過去の作品集はこちら">
+        <button class="btn-download" onclick="saveImage()">画像を保存する</button>
+    </div>
+
+    <div class="preview-scale">
+        <div id="card-capture">
+            <div class="deco" style="width:200px; height:200px; top:-50px; left:-50px;"></div>
+            <div class="deco" style="width:150px; height:150px; bottom:100px; right:100px;"></div>
+            
+            <div class="left-panel">
+                <div class="profile-header">
+                    <div class="icon-circle"></div>
+                    <div>
+                        <p class="name-text" id="out-name"></p>
+                        <p class="id-text" id="out-id"></p>
+                    </div>
+                </div>
+                <div class="about-text" id="out-about"></div>
+            </div>
+
+            <div class="right-panel">
+                <div class="item">
+                    <div class="item-icon" style="background: var(--accent-orange);">🎵</div>
+                    <div>
+                        <p class="item-title" id="out-t1"></p>
+                        <p class="item-desc" id="out-d1"></p>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-icon" style="background: var(--accent-purple);">🎮</div>
+                    <div>
+                        <p class="item-title" id="out-t2"></p>
+                        <p class="item-desc" id="out-d2"></p>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="item-icon" style="background: var(--accent-green);">🔗</div>
+                    <div>
+                        <p class="item-title" id="out-t3"></p>
+                        <p class="item-desc" id="out-d3"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 入力値をリアルタイムで反映させる
+        const inputs = ['name', 'id', 'about', 't1', 'd1', 't2', 'd2', 't3', 'd3'];
+        
+        function updatePreview() {
+            inputs.forEach(id => {
+                document.getElementById('out-' + id).innerText = document.getElementById('in-' + id).value;
+            });
+        }
+
+        inputs.forEach(id => {
+            document.getElementById('in-' + id).addEventListener('input', updatePreview);
+        });
+
+        // 画像保存
+        function saveImage() {
+            const target = document.getElementById("card-capture");
+            html2canvas(target, {
+                scale: 1, // 高解像度で書き出し
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement("a");
+                link.download = "profile-card.png";
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+            });
+        }
+
+        // 初期実行
+        updatePreview();
+    </script>
+</body>
+</html>
