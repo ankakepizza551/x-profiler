@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creator Card Maker</title>
+    <title>Creator Card Maker Pro</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -24,7 +24,7 @@
             align-items: center;
         }
 
-        /* 入力フォームエリア */
+        /* エディタエリア */
         .editor-container {
             background: white;
             padding: 20px;
@@ -61,11 +61,10 @@
         .btn-get { background: #1DA1F2; color: white; }
         .btn-save { background: #333; color: white; margin-top: 10px; }
 
-        /* プレビュー表示エリア（スマホではスクロール可能に） */
+        /* プレビューエリア（スマホ対応スクロール） */
         .preview-outer {
             width: 100%;
             overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
             background: #e0e0e0;
             padding: 20px 0;
             display: flex;
@@ -86,18 +85,63 @@
             transform-origin: top left;
         }
 
-        /* 内部デザイン */
-        .left-panel { flex: 1; z-index: 1; display: flex; flex-direction: column; }
-        .profile-header { display: flex; align-items: center; margin-bottom: 40px; }
-        #out-icon {
-            width: 180px; height: 180px; background: #fff;
-            border: 10px solid #ffeb3b; border-radius: 50%;
-            margin-right: 30px; object-fit: cover;
+        /* --- ここから内部レイアウトの修正 --- */
+        .left-panel {
+            flex: 1;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            padding-right: 40px;
+            overflow: hidden; /* はみ出し防止 */
         }
-        .name-text { font-size: 80px; font-weight: 900; margin: 0; color: #333; }
-        .id-text { font-size: 40px; color: #666; margin: 0; }
-        .about-text { font-size: 38px; line-height: 1.5; color: #444; margin-top: 30px; white-space: pre-wrap; }
 
+        .profile-header {
+            display: flex;
+            flex-direction: column; /* 横並びから縦並びに変更 */
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+        #out-icon {
+            width: 180px;
+            height: 180px;
+            background: #fff;
+            border: 10px solid #ffeb3b;
+            border-radius: 50%;
+            margin-bottom: 25px; /* 下にマージンを持たせる */
+            object-fit: cover;
+        }
+
+        .name-container {
+            width: 100%;
+            word-wrap: break-word; /* 長い名前を自動改行 */
+        }
+
+        .name-text {
+            font-size: 80px;
+            font-weight: 900;
+            margin: 0;
+            color: #333;
+            line-height: 1.1;
+        }
+
+        .id-text {
+            font-size: 45px; /* 少し大きくして読みやすく */
+            color: #666;
+            margin: 10px 0 0 0;
+            font-weight: bold;
+        }
+
+        .about-text {
+            font-size: 38px;
+            line-height: 1.5;
+            color: #444;
+            margin-top: 30px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* 右側パネル */
         .right-panel { width: 650px; display: flex; flex-direction: column; gap: 40px; z-index: 1; }
         .item {
             background: white; padding: 30px; border-radius: 30px;
@@ -140,16 +184,18 @@
         <div id="card-capture">
             <div class="deco" style="width:200px; height:200px; top:-50px; left:-50px;"></div>
             <div class="deco" style="width:150px; height:150px; bottom:100px; right:100px;"></div>
+            
             <div class="left-panel">
                 <div class="profile-header">
                     <img id="out-icon" src="data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23ccc'><circle cx='50' cy='50' r='50'/></svg>">
-                    <div>
+                    <div class="name-container">
                         <p class="name-text" id="out-name"></p>
                         <p class="id-text" id="out-id"></p>
                     </div>
                 </div>
                 <div class="about-text" id="out-about"></div>
             </div>
+
             <div class="right-panel">
                 <div class="item">
                     <div class="item-icon" style="background: var(--accent-orange);">🎵</div>
@@ -164,7 +210,6 @@
     </div>
 
     <script>
-        // プレビューの縮小表示（スマホ対応）
         function setScale() {
             const outer = document.getElementById('preview-outer');
             const card = document.getElementById('card-capture');
@@ -176,7 +221,6 @@
         window.addEventListener('resize', setScale);
         window.addEventListener('load', setScale);
 
-        // アイコン取得
         function loadXIcon() {
             const id = document.getElementById('in-x-id').value;
             if(!id) return;
@@ -185,7 +229,6 @@
             img.src = `https://unavatar.io/twitter/${id}`;
         }
 
-        // リアルタイム反映
         const fields = ['name', 'id', 'about', 't1', 'd1', 't2', 'd2'];
         function update() {
             fields.forEach(f => { document.getElementById('out-'+f).innerText = document.getElementById('in-'+f).value; });
@@ -193,11 +236,10 @@
         fields.forEach(f => { document.getElementById('in-'+f).addEventListener('input', update); });
         update();
 
-        // 保存機能
         function saveImage() {
             const card = document.getElementById('card-capture');
             const currentTransform = card.style.transform;
-            card.style.transform = "scale(1)"; // 保存時は等倍に戻す
+            card.style.transform = "scale(1)";
 
             html2canvas(card, { useCORS: true, scale: 1 }).then(canvas => {
                 const link = document.createElement("a");
@@ -206,11 +248,11 @@
                 
                 if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
                     const newWin = window.open("");
-                    newWin.document.write('<h3>画像を長押しして保存してください</h3><img src="'+link.href+'" style="width:100%;">');
+                    newWin.document.write('<h3>画像を長押しして保存</h3><img src="'+link.href+'" style="width:100%;">');
                 } else {
                     link.click();
                 }
-                card.style.transform = currentTransform; // プレビューの縮小を戻す
+                card.style.transform = currentTransform;
             });
         }
     </script>
