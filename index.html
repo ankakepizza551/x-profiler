@@ -3,14 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Multi-Creator Card Maker V2</title>
+    <title>Creator Intro Card Maker</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --bg-gradient: linear-gradient(135deg, #a1ffce 0%, #faffd1 100%);
-            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-bg: rgba(255, 255, 255, 0.9);
             --text-main: #2d3436;
             --text-sub: #636e72;
+            --accent-color: #00b894;
         }
 
         body {
@@ -20,165 +21,173 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            color: var(--text-main);
         }
 
-        /* エディタ部分 */
         .editor {
             background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             width: 100%;
-            max-width: 500px;
-            margin-bottom: 20px;
+            max-width: 600px;
+            margin-bottom: 30px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 15px;
         }
 
         input, textarea {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 10px;
             width: 100%;
             box-sizing: border-box;
             font-size: 16px;
         }
 
         .btn-save {
-            background: #2d3436;
+            background: var(--text-main);
             color: white;
-            padding: 15px;
+            padding: 18px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 18px;
         }
 
-        /* プレビューエリア */
         #preview-wrap {
             width: 100%;
             overflow-x: auto;
-            background: #ccc;
-            padding: 20px;
-            border-radius: 15px;
+            background: #dcdde1;
+            padding: 40px 0;
+            display: flex;
+            justify-content: center;
+            border-radius: 20px;
         }
 
-        /* カード本体 (1600x900) */
         #card {
             width: 1600px;
             height: 900px;
             background: var(--bg-gradient);
             display: flex;
-            padding: 60px 80px;
+            padding: 80px;
             box-sizing: border-box;
             position: relative;
             flex-shrink: 0;
             transform-origin: top left;
         }
 
-        .left {
+        .left-side {
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start; /* 上詰めに変更 */
-            padding-top: 20px;
+            justify-content: flex-start;
         }
 
         #out-icon {
-            width: 200px;
-            height: 200px;
+            width: 220px;
+            height: 220px;
             border-radius: 50%;
-            border: 8px solid white;
-            margin-bottom: 20px;
+            border: 10px solid white;
+            margin-bottom: 30px;
             object-fit: cover;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
 
-        .out-name { font-size: 80px; font-weight: 900; margin: 0; line-height: 1.1; }
-        .out-id { font-size: 40px; color: var(--text-sub); margin-bottom: 25px; }
+        .name-area { margin-bottom: 40px; }
+        .out-name { font-size: 85px; font-weight: 900; margin: 0; line-height: 1.1; }
+        .out-id { font-size: 40px; color: var(--text-sub); margin-top: 10px; font-weight: bold; }
         
-        /* 15行対応の自己紹介エリア */
         .out-bio { 
             font-size: 28px; 
-            line-height: 1.4; 
+            line-height: 1.5; 
             white-space: pre-wrap; 
-            color: var(--text-main);
-            max-width: 800px; /* 右側と被らないように制限 */
+            max-width: 850px;
+            font-weight: 500;
         }
 
-        .right {
-            width: 650px;
+        .right-side {
+            width: 550px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            gap: 30px;
+            gap: 25px;
         }
 
-        .link-box {
+        .badge {
             background: var(--card-bg);
             padding: 30px;
-            border-radius: 25px;
+            border-radius: 30px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(5px);
+            border-left: 15px solid var(--accent-color);
         }
 
-        .link-label { font-size: 26px; font-weight: bold; color: var(--text-sub); margin-bottom: 8px; }
-        .link-url { font-size: 32px; font-weight: bold; color: #0984e3; word-break: break-all; }
+        .badge-title { font-size: 24px; font-weight: bold; color: var(--text-sub); margin-bottom: 5px; }
+        .badge-content { font-size: 38px; font-weight: 900; color: var(--text-main); }
     </style>
 </head>
 <body>
 
     <div class="editor">
-        <input type="text" id="in-id" placeholder="Twitter ID (例: ankakepizza551)">
+        <input type="text" id="in-id" placeholder="X ID (例: ankakepizza551)">
         <input type="text" id="in-name" placeholder="表示名" value="ねのーん@マルチクリエイターおじさん">
         <textarea id="in-bio" rows="10" placeholder="自己紹介文 (15行程度まで)"></textarea>
         
-        <div style="display:flex; gap:5px;">
-            <input type="text" id="in-l1" placeholder="ラベル1" value="YouTube">
-            <input type="text" id="in-u1" placeholder="URL 1">
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="in-b1-t" placeholder="見出し1" value="MAIN ACTIVITY">
+            <input type="text" id="in-b1-c" placeholder="内容1" value="DTM / Web制作">
         </div>
-        <div style="display:flex; gap:5px;">
-            <input type="text" id="in-l2" placeholder="ラベル2" value="ニコニコ動画">
-            <input type="text" id="in-u2" placeholder="URL 2">
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="in-b2-t" placeholder="見出し2" value="GAME">
+            <input type="text" id="in-b2-c" placeholder="内容2" value="東方非想天則">
+        </div>
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="in-b3-t" placeholder="見出し3" value="FAVORITE">
+            <input type="text" id="in-b3-c" placeholder="内容3" value="Minecraft / 草野球">
         </div>
         
-        <button class="btn-save" onclick="saveImage()">画像を保存する</button>
+        <button class="btn-save" onclick="saveImage()">画像を保存してXにポストする</button>
     </div>
 
     <div id="preview-wrap">
         <div id="card">
-            <div class="left">
+            <div class="left-side">
                 <img id="out-icon" src="https://unavatar.io/twitter/google">
-                <p class="out-name" id="disp-name"></p>
-                <p class="out-id" id="disp-id"></p>
+                <div class="name-area">
+                    <p class="out-name" id="disp-name"></p>
+                    <p class="out-id" id="disp-id"></p>
+                </div>
                 <div class="out-bio" id="disp-bio"></div>
             </div>
-            <div class="right">
-                <div class="link-box">
-                    <div class="link-label" id="disp-l1"></div>
-                    <div class="link-url" id="disp-u1"></div>
+            <div class="right-side">
+                <div class="badge">
+                    <div class="badge-title" id="disp-b1-t"></div>
+                    <div class="badge-content" id="disp-b1-c"></div>
                 </div>
-                <div class="link-box">
-                    <div class="link-label" id="disp-l2"></div>
-                    <div class="link-url" id="disp-u2"></div>
+                <div class="badge" style="--accent-color: #0984e3;">
+                    <div class="badge-title" id="disp-b2-t"></div>
+                    <div class="badge-content" id="disp-b2-c"></div>
+                </div>
+                <div class="badge" style="--accent-color: #6c5ce7;">
+                    <div class="badge-title" id="disp-b3-t"></div>
+                    <div class="badge-content" id="disp-b3-c"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const inputs = ['id', 'name', 'bio', 'l1', 'u1', 'l2', 'u2'];
+        const fields = ['id', 'name', 'bio', 'b1-t', 'b1-c', 'b2-t', 'b2-c', 'b3-t', 'b3-c'];
         
         function update() {
             const id = document.getElementById('in-id').value;
             document.getElementById('disp-id').innerText = id ? '@' + id : '';
-            document.getElementById('disp-name').innerText = document.getElementById('in-name').value;
-            document.getElementById('disp-bio').innerText = document.getElementById('in-bio').value;
-            document.getElementById('disp-l1').innerText = document.getElementById('in-l1').value;
-            document.getElementById('disp-u1').innerText = document.getElementById('in-u1').value;
-            document.getElementById('disp-l2').innerText = document.getElementById('in-l2').value;
-            document.getElementById('disp-u2').innerText = document.getElementById('in-u2').value;
+            fields.slice(1).forEach(f => {
+                document.getElementById('disp-'+f).innerText = document.getElementById('in-'+f).value;
+            });
             
             if(id) {
                 const img = document.getElementById('out-icon');
@@ -187,15 +196,15 @@
             }
         }
 
-        inputs.forEach(k => document.getElementById('in-'+k).addEventListener('input', update));
+        fields.forEach(f => document.getElementById('in-'+f).addEventListener('input', update));
         
         function setScale() {
             const wrap = document.getElementById('preview-wrap');
             const card = document.getElementById('card');
             const scale = wrap.offsetWidth / 1600;
-            const finalScale = Math.min(scale, 1);
+            const finalScale = Math.min(scale, 0.9); // 少し余裕を持たせる
             card.style.transform = `scale(${finalScale})`;
-            wrap.style.height = (900 * finalScale + 40) + "px";
+            wrap.style.height = (900 * finalScale + 80) + "px";
         }
 
         window.addEventListener('resize', setScale);
@@ -213,7 +222,7 @@
                 
                 if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
                     const newWin = window.open("");
-                    newWin.document.write('<div style="text-align:center;padding:20px;"><p>画像を長押しして保存してください</p><img src="'+link.href+'" style="width:100%; border-radius:10px;"></div>');
+                    newWin.document.write('<div style="text-align:center;padding:20px;font-family:sans-serif;"><h3>画像を長押しで保存</h3><img src="'+link.href+'" style="width:100%; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1);"><p style="margin-top:20px;">保存したらXを開いてポストしましょう！</p></div>');
                 } else {
                     link.click();
                 }
