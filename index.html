@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Creator Intro Card Maker</title>
+    <title>Ultimate Creator Card Maker</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -11,7 +11,7 @@
             --card-bg: rgba(255, 255, 255, 0.9);
             --text-main: #2d3436;
             --text-sub: #636e72;
-            --accent-color: #00b894;
+            --accent-blue: #0984e3;
         }
 
         body {
@@ -34,28 +34,21 @@
             margin-bottom: 30px;
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 12px;
         }
 
+        .input-row { display: flex; gap: 8px; }
         input, textarea {
             padding: 12px;
             border: 2px solid #eee;
             border-radius: 10px;
             width: 100%;
             box-sizing: border-box;
-            font-size: 16px;
+            font-size: 15px;
         }
 
-        .btn-save {
-            background: var(--text-main);
-            color: white;
-            padding: 18px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 18px;
-        }
+        .btn-get { background: #00acee; color: white; border: none; border-radius: 10px; padding: 0 20px; cursor: pointer; font-weight: bold; }
+        .btn-save { background: var(--text-main); color: white; padding: 18px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 18px; margin-top: 10px; }
 
         #preview-wrap {
             width: 100%;
@@ -72,7 +65,7 @@
             height: 900px;
             background: var(--bg-gradient);
             display: flex;
-            padding: 80px;
+            padding: 70px 80px;
             box-sizing: border-box;
             position: relative;
             flex-shrink: 0;
@@ -83,33 +76,24 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
         }
 
         #out-icon {
-            width: 220px;
-            height: 220px;
+            width: 180px;
+            height: 180px;
             border-radius: 50%;
             border: 10px solid white;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             object-fit: cover;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
         }
 
-        .name-area { margin-bottom: 40px; }
-        .out-name { font-size: 85px; font-weight: 900; margin: 0; line-height: 1.1; }
-        .out-id { font-size: 40px; color: var(--text-sub); margin-top: 10px; font-weight: bold; }
-        
-        .out-bio { 
-            font-size: 28px; 
-            line-height: 1.5; 
-            white-space: pre-wrap; 
-            max-width: 850px;
-            font-weight: 500;
-        }
+        .out-name { font-size: 75px; font-weight: 900; margin: 0; line-height: 1.1; }
+        .out-id { font-size: 38px; color: var(--text-sub); margin-bottom: 25px; font-weight: bold; }
+        .out-bio { font-size: 26px; line-height: 1.5; white-space: pre-wrap; max-width: 800px; }
 
         .right-side {
-            width: 550px;
+            width: 620px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -118,48 +102,58 @@
 
         .badge {
             background: var(--card-bg);
-            padding: 30px;
-            border-radius: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            padding: 25px 30px;
+            border-radius: 25px;
+            border-left: 12px solid #00b894;
             backdrop-filter: blur(5px);
-            border-left: 15px solid var(--accent-color);
         }
 
-        .badge-title { font-size: 24px; font-weight: bold; color: var(--text-sub); margin-bottom: 5px; }
-        .badge-content { font-size: 38px; font-weight: 900; color: var(--text-main); }
+        .badge-title { font-size: 22px; font-weight: bold; color: var(--text-sub); margin-bottom: 4px; }
+        .badge-content { font-size: 34px; font-weight: 900; }
+
+        .url-box {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 20px 30px;
+            border-radius: 20px;
+        }
+        .url-label { font-size: 20px; font-weight: bold; color: var(--text-sub); }
+        .url-text { font-size: 24px; color: var(--accent-blue); font-weight: bold; word-break: break-all; margin-top: 5px; }
     </style>
 </head>
 <body>
 
     <div class="editor">
-        <input type="text" id="in-id" placeholder="X ID (例: ankakepizza551)">
-        <input type="text" id="in-name" placeholder="表示名" value="ねのーん@マルチクリエイターおじさん">
-        <textarea id="in-bio" rows="10" placeholder="自己紹介文 (15行程度まで)"></textarea>
+        <div class="input-row">
+            <input type="text" id="in-x-id" placeholder="X ID (例: ankakepizza551)">
+            <button class="btn-get" onclick="loadIcon()">取得</button>
+        </div>
+        <input type="text" id="in-name" placeholder="名前" value="ねのーん@マルチクリエイター">
+        <input type="text" id="in-id" placeholder="表示用ID" value="@ankakepizza551">
+        <textarea id="in-bio" rows="6" placeholder="自己紹介文 (15行程度まで)"></textarea>
         
-        <div style="display:flex; gap:10px;">
-            <input type="text" id="in-b1-t" placeholder="見出し1" value="MAIN ACTIVITY">
-            <input type="text" id="in-b1-c" placeholder="内容1" value="DTM / Web制作">
-        </div>
-        <div style="display:flex; gap:10px;">
-            <input type="text" id="in-b2-t" placeholder="見出し2" value="GAME">
-            <input type="text" id="in-b2-c" placeholder="内容2" value="東方非想天則">
-        </div>
-        <div style="display:flex; gap:10px;">
-            <input type="text" id="in-b3-t" placeholder="見出し3" value="FAVORITE">
-            <input type="text" id="in-b3-c" placeholder="内容3" value="Minecraft / 草野球">
+        <div class="input-row">
+            <input type="text" id="in-b1-t" placeholder="バッジ見出し" value="MAIN">
+            <input type="text" id="in-b1-c" placeholder="バッジ内容" value="DTM / Web制作">
         </div>
         
-        <button class="btn-save" onclick="saveImage()">画像を保存してXにポストする</button>
+        <div class="input-row">
+            <input type="text" id="in-u1-l" placeholder="URLラベル1" value="YouTube">
+            <input type="text" id="in-u1-v" placeholder="URL 1">
+        </div>
+        <div class="input-row">
+            <input type="text" id="in-u2-l" placeholder="URLラベル2" value="ニコニコ動画">
+            <input type="text" id="in-u2-v" placeholder="URL 2">
+        </div>
+        
+        <button class="btn-save" onclick="saveImage()">画像を保存する</button>
     </div>
 
     <div id="preview-wrap">
         <div id="card">
             <div class="left-side">
                 <img id="out-icon" src="https://unavatar.io/twitter/google">
-                <div class="name-area">
-                    <p class="out-name" id="disp-name"></p>
-                    <p class="out-id" id="disp-id"></p>
-                </div>
+                <p class="out-name" id="disp-name"></p>
+                <p class="out-id" id="disp-id"></p>
                 <div class="out-bio" id="disp-bio"></div>
             </div>
             <div class="right-side">
@@ -167,33 +161,33 @@
                     <div class="badge-title" id="disp-b1-t"></div>
                     <div class="badge-content" id="disp-b1-c"></div>
                 </div>
-                <div class="badge" style="--accent-color: #0984e3;">
-                    <div class="badge-title" id="disp-b2-t"></div>
-                    <div class="badge-content" id="disp-b2-c"></div>
+                <div class="url-box">
+                    <div class="url-label" id="disp-u1-l"></div>
+                    <div class="url-text" id="disp-u1-v"></div>
                 </div>
-                <div class="badge" style="--accent-color: #6c5ce7;">
-                    <div class="badge-title" id="disp-b3-t"></div>
-                    <div class="badge-content" id="disp-b3-c"></div>
+                <div class="url-box">
+                    <div class="url-label" id="disp-u2-l"></div>
+                    <div class="url-text" id="disp-u2-v"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const fields = ['id', 'name', 'bio', 'b1-t', 'b1-c', 'b2-t', 'b2-c', 'b3-t', 'b3-c'];
+        const fields = ['name', 'id', 'bio', 'b1-t', 'b1-c', 'u1-l', 'u1-v', 'u2-l', 'u2-v'];
         
         function update() {
-            const id = document.getElementById('in-id').value;
-            document.getElementById('disp-id').innerText = id ? '@' + id : '';
-            fields.slice(1).forEach(f => {
+            fields.forEach(f => {
                 document.getElementById('disp-'+f).innerText = document.getElementById('in-'+f).value;
             });
-            
-            if(id) {
-                const img = document.getElementById('out-icon');
-                img.crossOrigin = "anonymous";
-                img.src = `https://unavatar.io/twitter/${id}`;
-            }
+        }
+
+        function loadIcon() {
+            const id = document.getElementById('in-x-id').value;
+            if(!id) return;
+            const img = document.getElementById('out-icon');
+            img.crossOrigin = "anonymous";
+            img.src = `https://unavatar.io/twitter/${id}`;
         }
 
         fields.forEach(f => document.getElementById('in-'+f).addEventListener('input', update));
@@ -201,10 +195,9 @@
         function setScale() {
             const wrap = document.getElementById('preview-wrap');
             const card = document.getElementById('card');
-            const scale = wrap.offsetWidth / 1600;
-            const finalScale = Math.min(scale, 0.9); // 少し余裕を持たせる
-            card.style.transform = `scale(${finalScale})`;
-            wrap.style.height = (900 * finalScale + 80) + "px";
+            const scale = Math.min(wrap.offsetWidth / 1600, 1);
+            card.style.transform = `scale(${scale})`;
+            wrap.style.height = (900 * scale + 60) + "px";
         }
 
         window.addEventListener('resize', setScale);
@@ -214,18 +207,14 @@
             const card = document.getElementById('card');
             const currentTransform = card.style.transform;
             card.style.transform = "scale(1)";
-
             html2canvas(card, { useCORS: true, scale: 1 }).then(canvas => {
                 const link = document.createElement("a");
                 link.href = canvas.toDataURL("image/png");
                 link.download = "my-profile-card.png";
-                
                 if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
                     const newWin = window.open("");
-                    newWin.document.write('<div style="text-align:center;padding:20px;font-family:sans-serif;"><h3>画像を長押しで保存</h3><img src="'+link.href+'" style="width:100%; border-radius:20px; box-shadow:0 10px 30px rgba(0,0,0,0.1);"><p style="margin-top:20px;">保存したらXを開いてポストしましょう！</p></div>');
-                } else {
-                    link.click();
-                }
+                    newWin.document.write('<div style="text-align:center;padding:20px;"><img src="'+link.href+'" style="width:100%; border-radius:20px;"><p>長押しして保存してください</p></div>');
+                } else { link.click(); }
                 card.style.transform = currentTransform;
             });
         }
