@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flexible Creator Card Maker</title>
+    <title>Multi-Creator Card Maker V2</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
@@ -42,6 +42,7 @@
             border-radius: 8px;
             width: 100%;
             box-sizing: border-box;
+            font-size: 16px;
         }
 
         .btn-save {
@@ -52,6 +53,7 @@
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
+            font-size: 16px;
         }
 
         /* プレビューエリア */
@@ -69,7 +71,7 @@
             height: 900px;
             background: var(--bg-gradient);
             display: flex;
-            padding: 80px;
+            padding: 60px 80px;
             box-sizing: border-box;
             position: relative;
             flex-shrink: 0;
@@ -80,55 +82,65 @@
             flex: 1;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start; /* 上詰めに変更 */
+            padding-top: 20px;
         }
 
         #out-icon {
-            width: 250px;
-            height: 250px;
+            width: 200px;
+            height: 200px;
             border-radius: 50%;
-            border: 10px solid white;
-            margin-bottom: 30px;
+            border: 8px solid white;
+            margin-bottom: 20px;
             object-fit: cover;
         }
 
-        .out-name { font-size: 100px; font-weight: 900; margin: 0; }
-        .out-id { font-size: 50px; color: var(--text-sub); margin-bottom: 40px; }
-        .out-bio { font-size: 40px; line-height: 1.5; white-space: pre-wrap; }
+        .out-name { font-size: 80px; font-weight: 900; margin: 0; line-height: 1.1; }
+        .out-id { font-size: 40px; color: var(--text-sub); margin-bottom: 25px; }
+        
+        /* 15行対応の自己紹介エリア */
+        .out-bio { 
+            font-size: 28px; 
+            line-height: 1.4; 
+            white-space: pre-wrap; 
+            color: var(--text-main);
+            max-width: 800px; /* 右側と被らないように制限 */
+        }
 
         .right {
-            width: 700px;
+            width: 650px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            gap: 40px;
+            gap: 30px;
         }
 
         .link-box {
             background: var(--card-bg);
-            padding: 40px;
-            border-radius: 30px;
+            padding: 30px;
+            border-radius: 25px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            backdrop-filter: blur(10px);
         }
 
-        .link-label { font-size: 30px; font-weight: bold; color: var(--text-sub); margin-bottom: 10px; }
-        .link-url { font-size: 45px; font-weight: bold; color: #0984e3; word-break: break-all; }
+        .link-label { font-size: 26px; font-weight: bold; color: var(--text-sub); margin-bottom: 8px; }
+        .link-url { font-size: 32px; font-weight: bold; color: #0984e3; word-break: break-all; }
     </style>
 </head>
 <body>
 
     <div class="editor">
-        <input type="text" id="in-id" placeholder="Twitter ID (例: Gemini_AI)">
-        <input type="text" id="in-name" placeholder="表示名" value="Your Name">
-        <textarea id="in-bio" rows="3" placeholder="自己紹介文"></textarea>
+        <input type="text" id="in-id" placeholder="Twitter ID (例: ankakepizza551)">
+        <input type="text" id="in-name" placeholder="表示名" value="ねのーん@マルチクリエイターおじさん">
+        <textarea id="in-bio" rows="10" placeholder="自己紹介文 (15行程度まで)"></textarea>
         
         <div style="display:flex; gap:5px;">
-            <input type="text" id="in-l1" placeholder="ラベル1 (例: GitHub)" style="width:40%;">
-            <input type="text" id="in-u1" placeholder="URL 1" style="width:60%;">
+            <input type="text" id="in-l1" placeholder="ラベル1" value="YouTube">
+            <input type="text" id="in-u1" placeholder="URL 1">
         </div>
         <div style="display:flex; gap:5px;">
-            <input type="text" id="in-l2" placeholder="ラベル2 (例: Portfolio)" style="width:40%;">
-            <input type="text" id="in-u2" placeholder="URL 2" style="width:60%;">
+            <input type="text" id="in-l2" placeholder="ラベル2" value="ニコニコ動画">
+            <input type="text" id="in-u2" placeholder="URL 2">
         </div>
         
         <button class="btn-save" onclick="saveImage()">画像を保存する</button>
@@ -181,8 +193,9 @@
             const wrap = document.getElementById('preview-wrap');
             const card = document.getElementById('card');
             const scale = wrap.offsetWidth / 1600;
-            card.style.transform = `scale(${Math.min(scale, 1)})`;
-            wrap.style.height = (900 * Math.min(scale, 1) + 40) + "px";
+            const finalScale = Math.min(scale, 1);
+            card.style.transform = `scale(${finalScale})`;
+            wrap.style.height = (900 * finalScale + 40) + "px";
         }
 
         window.addEventListener('resize', setScale);
@@ -197,7 +210,13 @@
                 const link = document.createElement("a");
                 link.href = canvas.toDataURL("image/png");
                 link.download = "my-profile-card.png";
-                link.click();
+                
+                if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
+                    const newWin = window.open("");
+                    newWin.document.write('<div style="text-align:center;padding:20px;"><p>画像を長押しして保存してください</p><img src="'+link.href+'" style="width:100%; border-radius:10px;"></div>');
+                } else {
+                    link.click();
+                }
                 card.style.transform = currentTransform;
             });
         }
