@@ -385,6 +385,10 @@
                 <input type="text" id="in-xid" placeholder="X ID（@なし）">
                 <button class="btn btn-get" onclick="loadIcon()">取得</button>
             </div>
+            <label style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:8px;cursor:pointer">
+                <span style="white-space:nowrap;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase">または画像から</span>
+                <input type="file" id="in-icon-file" accept="image/*" onchange="loadIconFile(this)" style="flex:1;font-size:11px;padding:5px 8px">
+            </label>
             <input type="text" id="in-name"   placeholder="名前" value="ねのーん">
             <input type="text" id="in-handle" placeholder="表示ハンドル" value="@ankakepizza551">
         </div>
@@ -543,12 +547,32 @@ function updateCard(){
     document.getElementById('disp-urls').innerHTML=urls.filter(u=>u.val).map(u=>`<div class="url-row"><div class="url-plat">${u.platform}</div><div class="url-sep"></div><div class="url-val">${u.val}</div></div>`).join('');
 }
 
+function loadIconFile(input){
+    const file=input.files[0];
+    if(!file)return;
+    const reader=new FileReader();
+    reader.onload=()=>{ document.getElementById('out-icon').src=reader.result; };
+    reader.readAsDataURL(file);
+}
+
 function loadIcon(){
     const id=document.getElementById('in-xid').value.trim();
     if(!id)return;
-    const img=document.getElementById('out-icon');
-    img.crossOrigin='anonymous';
-    img.src=`https://unavatar.io/twitter/${id}?cb=${Date.now()}`;
+    const url=`https://unavatar.io/twitter/${id}?cb=${Date.now()}`;
+    // Fetch → canvas → base64 でCORSを回避
+    fetch(url)
+        .then(r=>{ if(!r.ok)throw new Error('fetch failed'); return r.blob(); })
+        .then(blob=>{
+            const reader=new FileReader();
+            reader.onload=()=>{ document.getElementById('out-icon').src=reader.result; };
+            reader.readAsDataURL(blob);
+        })
+        .catch(()=>{
+            // fetchも失敗した場合は直接srcにセット（プレビューだけでも表示）
+            const img=document.getElementById('out-icon');
+            img.crossOrigin='anonymous';
+            img.src=url;
+        });
 }
 
 function setScale(){
