@@ -3,221 +3,579 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Creator Card Maker</title>
+    <title>Creator Card Maker</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;900&family=Noto+Sans+JP:wght@300;400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-gradient: linear-gradient(135deg, #a1ffce 0%, #faffd1 100%);
-            --card-bg: rgba(255, 255, 255, 0.9);
-            --text-main: #2d3436;
-            --text-sub: #636e72;
-            --accent-blue: #0984e3;
+            --bg:    #080810;
+            --surf:  #0f0f1a;
+            --surf2: #16161f;
+            --bord:  rgba(255,255,255,0.07);
+            --text:  #eeeef6;
+            --muted: #55556a;
+            --acc:   #b8ff57;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
-            background-color: #e9ecef;
+            font-family: 'Noto Sans JP', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 36px 20px 64px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
-            color: var(--text-main);
+            gap: 36px;
         }
 
+        /* Header */
+        .site-header h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        .site-header h1 span { color: var(--acc); }
+
+        /* Editor */
         .editor {
-            background: white;
-            padding: 25px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
             width: 100%;
             max-width: 600px;
-            margin-bottom: 30px;
+            background: var(--surf);
+            border: 1px solid var(--bord);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .ed-sec { padding: 16px 20px; border-bottom: 1px solid var(--bord); }
+        .ed-sec:last-of-type { border-bottom: none; }
+        .ed-lbl {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 10px;
             display: flex;
-            flex-direction: column;
-            gap: 12px;
+            justify-content: space-between;
+            align-items: center;
         }
+        .fstack { display: flex; flex-direction: column; gap: 6px; }
+        .row    { display: flex; gap: 6px; align-items: stretch; }
 
-        .input-row { display: flex; gap: 8px; }
-        input, textarea {
-            padding: 12px;
-            border: 2px solid #eee;
-            border-radius: 10px;
+        input, select {
+            background: var(--surf2);
+            border: 1px solid var(--bord);
+            border-radius: 7px;
+            color: var(--text);
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 13px;
+            padding: 10px 13px;
             width: 100%;
-            box-sizing: border-box;
-            font-size: 15px;
+            outline: none;
+            transition: border-color 0.15s, background 0.15s;
+            -webkit-appearance: none;
         }
+        input::placeholder { color: var(--muted); font-size: 12px; }
+        input:focus, select:focus { border-color: rgba(184,255,87,0.35); background: #1a1a26; }
+        select { cursor: pointer; }
+        select option { background: #16161f; }
 
-        .btn-get { background: #00acee; color: white; border: none; border-radius: 10px; padding: 0 20px; cursor: pointer; font-weight: bold; }
-        .btn-save { background: var(--text-main); color: white; padding: 18px; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 18px; margin-top: 10px; }
+        .btn {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        .btn:active { transform: scale(0.96); }
+        .btn-get {
+            background: var(--surf2);
+            border: 1px solid var(--bord);
+            color: #60d0f0;
+            padding: 0 14px;
+            flex-shrink: 0;
+            font-size: 10px;
+        }
+        .btn-get:hover { border-color: #60d0f0; }
+        .btn-add {
+            background: transparent;
+            border: 1px dashed rgba(255,255,255,0.1);
+            color: var(--muted);
+            padding: 8px;
+            width: 100%;
+            font-size: 10px;
+            margin-top: 4px;
+        }
+        .btn-add:hover { border-color: var(--acc); color: var(--acc); }
+        .btn-rm {
+            background: transparent;
+            border: none;
+            color: #444;
+            font-size: 16px;
+            padding: 0 8px;
+            flex-shrink: 0;
+            cursor: pointer;
+            font-family: monospace;
+            transition: color 0.15s;
+        }
+        .btn-rm:hover { color: #e05050; }
+        .btn-save {
+            display: block;
+            background: var(--acc);
+            color: #080810;
+            padding: 15px;
+            width: calc(100% - 40px);
+            margin: 16px 20px 20px;
+            font-size: 12px;
+            letter-spacing: 0.18em;
+            border-radius: 9px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            text-transform: uppercase;
+            transition: opacity 0.15s;
+        }
+        .btn-save:hover { opacity: 0.88; }
 
+        .char-hint { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--muted); }
+        .char-hint.warn { color: #f0a060; }
+
+        /* Swatches */
+        .swatch-row { display: flex; gap: 8px; flex-wrap: wrap; }
+        .swatch {
+            width: 36px; height: 22px;
+            border-radius: 5px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: transform 0.15s, border-color 0.15s;
+        }
+        .swatch:hover { transform: scale(1.12); }
+        .swatch.active { border-color: #fff; }
+
+        /* Preview */
         #preview-wrap {
             width: 100%;
-            overflow-x: auto;
-            background: #dcdde1;
-            padding: 40px 0;
+            max-width: 900px;
+            background: #04040a;
+            border-radius: 14px;
+            padding: 36px 0;
             display: flex;
             justify-content: center;
-            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.04);
         }
 
+        /* ═══ CARD ═══ */
         #card {
             width: 1600px;
             height: 900px;
-            background: var(--bg-gradient);
-            display: flex;
-            padding: 70px 80px;
-            box-sizing: border-box;
             position: relative;
             flex-shrink: 0;
             transform-origin: top left;
+            overflow: hidden;
+            display: flex;
         }
 
-        .left-side {
+        .cbg { position: absolute; inset: 0; z-index: 0; }
+        .cbg-base     { background: var(--cb, #08080f); }
+        .cbg-mesh     {
+            background:
+                radial-gradient(ellipse 900px 700px at 8% 110%,  var(--cm1, rgba(120,220,50,.2))  0%, transparent 70%),
+                radial-gradient(ellipse 700px 500px at 92% -5%,   var(--cm2, rgba(40,120,255,.12)) 0%, transparent 65%),
+                radial-gradient(ellipse 500px 400px at 72% 88%,   var(--cm3, rgba(180,80,255,.08)) 0%, transparent 60%);
+        }
+        .cbg-vignette {
+            background: radial-gradient(ellipse 130% 110% at 50% 50%, transparent 35%, rgba(0,0,0,0.7) 100%);
+        }
+        .cbg-grain {
+            opacity: 0.06;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23g)'/%3E%3C/svg%3E");
+            background-size: 300px 300px;
+        }
+        .cline-top {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent 0%, var(--ca,#b8ff57) 25%, var(--ca,#b8ff57) 75%, transparent 100%);
+            opacity: 0.65;
+            z-index: 2;
+        }
+        .card-wm {
+            position: absolute;
+            right: -20px; bottom: -80px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 600px;
+            line-height: 1;
+            color: rgba(255,255,255,0.02);
+            pointer-events: none;
+            z-index: 1;
+            user-select: none;
+        }
+
+        .card-body {
+            position: relative;
+            z-index: 3;
+            display: flex;
+            width: 100%;
+            height: 100%;
+            padding: 72px 88px 64px;
+            gap: 70px;
+        }
+
+        /* Left */
+        .card-left {
             flex: 1;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
         }
-
+        .card-profile { display: flex; align-items: center; gap: 36px; }
         #out-icon {
-            width: 180px;
-            height: 180px;
+            width: 120px; height: 120px;
             border-radius: 50%;
-            border: 10px solid white;
-            margin-bottom: 25px;
             object-fit: cover;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+            border: 2px solid rgba(255,255,255,0.12);
+            box-shadow: 0 0 0 8px rgba(255,255,255,0.04);
         }
-
-        .out-name { font-size: 75px; font-weight: 900; margin: 0; line-height: 1.1; }
-        .out-id { font-size: 38px; color: var(--text-sub); margin-bottom: 25px; font-weight: bold; }
-        .out-bio { font-size: 26px; line-height: 1.5; white-space: pre-wrap; max-width: 800px; }
-
-        .right-side {
-            width: 620px;
+        .out-name {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 88px;
+            line-height: 0.92;
+            letter-spacing: 0.02em;
+            color: #fff;
+        }
+        .out-handle {
+            font-family: 'Space Mono', monospace;
+            font-size: 22px;
+            color: rgba(255,255,255,0.3);
+            margin-top: 8px;
+        }
+        .card-center {
+            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            gap: 25px;
+            gap: 26px;
+        }
+        .out-catch {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 600;
+            font-size: 38px;
+            line-height: 1.35;
+            letter-spacing: 0.02em;
+            color: rgba(255,255,255,0.88);
+            max-width: 880px;
+        }
+        .out-tags { display: flex; gap: 10px; flex-wrap: wrap; }
+        .out-tag {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--ca, #b8ff57);
+            padding: 4px 16px;
+            border: 1.5px solid rgba(255,255,255,0.1);
+            border-radius: 3px;
+            background: rgba(255,255,255,0.04);
+        }
+        .card-footer-mark {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 20px;
+            letter-spacing: 0.3em;
+            color: rgba(255,255,255,0.1);
         }
 
+        /* Right */
+        .card-right {
+            width: 460px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 16px;
+        }
         .badge {
-            background: var(--card-bg);
-            padding: 25px 30px;
-            border-radius: 25px;
-            border-left: 12px solid #00b894;
-            backdrop-filter: blur(5px);
+            padding: 20px 26px;
+            background: rgba(255,255,255,0.035);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-left: 3px solid var(--ca, #b8ff57);
+            border-radius: 0 10px 10px 0;
+        }
+        .badge-lbl {
+            font-family: 'Space Mono', monospace;
+            font-size: 14px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.28);
+            margin-bottom: 4px;
+        }
+        .badge-val {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 56px;
+            line-height: 1;
+            color: var(--ca, #b8ff57);
+            letter-spacing: 0.02em;
+        }
+        .badge-unit {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 26px;
+            color: rgba(255,255,255,0.35);
+            margin-left: 4px;
+        }
+        .url-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 13px 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+        }
+        .url-plat {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.32);
+            width: 100px;
+            flex-shrink: 0;
+        }
+        .url-sep { width: 1px; height: 18px; background: rgba(255,255,255,0.1); flex-shrink: 0; }
+        .url-val {
+            font-family: 'Space Mono', monospace;
+            font-size: 16px;
+            color: rgba(255,255,255,0.5);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .badge-title { font-size: 22px; font-weight: bold; color: var(--text-sub); margin-bottom: 4px; }
-        .badge-content { font-size: 34px; font-weight: 900; }
-
-        .url-box {
-            background: rgba(255, 255, 255, 0.7);
-            padding: 20px 30px;
-            border-radius: 20px;
-        }
-        .url-label { font-size: 20px; font-weight: bold; color: var(--text-sub); }
-        .url-text { font-size: 24px; color: var(--accent-blue); font-weight: bold; word-break: break-all; margin-top: 5px; }
+        /* Themes */
+        .th-lime   { --cb:#07080f; --cm1:rgba(120,220,50,.2);  --cm2:rgba(40,120,255,.1);  --cm3:rgba(180,80,255,.07); --ca:#b8ff57; }
+        .th-cyan   { --cb:#060d14; --cm1:rgba(0,200,255,.18);  --cm2:rgba(0,80,200,.12);   --cm3:rgba(0,255,180,.08);  --ca:#40e0ff; }
+        .th-rose   { --cb:#120810; --cm1:rgba(255,60,140,.2);  --cm2:rgba(200,40,80,.12);  --cm3:rgba(255,140,60,.08); --ca:#ff4fa0; }
+        .th-gold   { --cb:#100d06; --cm1:rgba(255,180,0,.2);   --cm2:rgba(200,100,0,.12);  --cm3:rgba(255,220,80,.08); --ca:#ffc840; }
+        .th-violet { --cb:#0a080f; --cm1:rgba(140,60,255,.2);  --cm2:rgba(60,0,200,.12);   --cm3:rgba(255,60,200,.1);  --ca:#a060ff; }
+        .th-mono   { --cb:#080808; --cm1:rgba(160,160,160,.1); --cm2:rgba(80,80,80,.08);   --cm3:rgba(200,200,200,.05);--ca:#d0d0d0; }
     </style>
 </head>
 <body>
 
-    <div class="editor">
-        <div class="input-row">
-            <input type="text" id="in-x-id" placeholder="X ID (例: ankakepizza551)">
-            <button class="btn-get" onclick="loadIcon()">取得</button>
-        </div>
-        <input type="text" id="in-name" placeholder="名前" value="ねのーん@マルチクリエイター">
-        <input type="text" id="in-id" placeholder="表示用ID" value="@ankakepizza551">
-        <textarea id="in-bio" rows="6" placeholder="自己紹介文 (15行程度まで)"></textarea>
-        
-        <div class="input-row">
-            <input type="text" id="in-b1-t" placeholder="バッジ見出し" value="MAIN">
-            <input type="text" id="in-b1-c" placeholder="バッジ内容" value="DTM / Web制作">
-        </div>
-        
-        <div class="input-row">
-            <input type="text" id="in-u1-l" placeholder="URLラベル1" value="YouTube">
-            <input type="text" id="in-u1-v" placeholder="URL 1">
-        </div>
-        <div class="input-row">
-            <input type="text" id="in-u2-l" placeholder="URLラベル2" value="ニコニコ動画">
-            <input type="text" id="in-u2-v" placeholder="URL 2">
-        </div>
-        
-        <button class="btn-save" onclick="saveImage()">画像を保存する</button>
-    </div>
+<header class="site-header"><h1>Creator <span>Card</span> Maker</h1></header>
 
-    <div id="preview-wrap">
-        <div id="card">
-            <div class="left-side">
-                <img id="out-icon" src="https://unavatar.io/twitter/google">
-                <p class="out-name" id="disp-name"></p>
-                <p class="out-id" id="disp-id"></p>
-                <div class="out-bio" id="disp-bio"></div>
+<div class="editor">
+    <div class="ed-sec">
+        <div class="ed-lbl">Profile</div>
+        <div class="fstack">
+            <div class="row">
+                <input type="text" id="in-xid" placeholder="X ID（@なし）">
+                <button class="btn btn-get" onclick="loadIcon()">取得</button>
             </div>
-            <div class="right-side">
-                <div class="badge">
-                    <div class="badge-title" id="disp-b1-t"></div>
-                    <div class="badge-content" id="disp-b1-c"></div>
-                </div>
-                <div class="url-box">
-                    <div class="url-label" id="disp-u1-l"></div>
-                    <div class="url-text" id="disp-u1-v"></div>
-                </div>
-                <div class="url-box">
-                    <div class="url-label" id="disp-u2-l"></div>
-                    <div class="url-text" id="disp-u2-v"></div>
-                </div>
-            </div>
+            <input type="text" id="in-name"   placeholder="名前" value="ねのーん">
+            <input type="text" id="in-handle" placeholder="表示ハンドル" value="@ankakepizza551">
         </div>
     </div>
 
-    <script>
-        const fields = ['name', 'id', 'bio', 'b1-t', 'b1-c', 'u1-l', 'u1-v', 'u2-l', 'u2-v'];
-        
-        function update() {
-            fields.forEach(f => {
-                document.getElementById('disp-'+f).innerText = document.getElementById('in-'+f).value;
-            });
-        }
+    <div class="ed-sec">
+        <div class="ed-lbl">キャッチコピー <span class="char-hint" id="cc">0 / 40</span></div>
+        <input type="text" id="in-catch" placeholder="一言で自分を表すフレーズ（推奨40字以内）" maxlength="60">
+    </div>
 
-        function loadIcon() {
-            const id = document.getElementById('in-x-id').value;
-            if(!id) return;
-            const img = document.getElementById('out-icon');
-            img.crossOrigin = "anonymous";
-            img.src = `https://unavatar.io/twitter/${id}`;
-        }
+    <div class="ed-sec">
+        <div class="ed-lbl">活動ジャンル タグ</div>
+        <div id="tags-c" class="fstack"></div>
+        <button class="btn btn-add" onclick="addTag()">＋ タグを追加</button>
+    </div>
 
-        fields.forEach(f => document.getElementById('in-'+f).addEventListener('input', update));
-        
-        function setScale() {
-            const wrap = document.getElementById('preview-wrap');
-            const card = document.getElementById('card');
-            const scale = Math.min(wrap.offsetWidth / 1600, 1);
-            card.style.transform = `scale(${scale})`;
-            wrap.style.height = (900 * scale + 60) + "px";
-        }
+    <div class="ed-sec">
+        <div class="ed-lbl">実績バッジ（最大3個）</div>
+        <div id="badges-c" class="fstack"></div>
+        <button class="btn btn-add" id="btn-add-badge" onclick="addBadge()">＋ バッジを追加</button>
+    </div>
 
-        window.addEventListener('resize', setScale);
-        window.addEventListener('load', () => { update(); setScale(); });
+    <div class="ed-sec">
+        <div class="ed-lbl">リンク</div>
+        <div id="urls-c" class="fstack"></div>
+        <button class="btn btn-add" onclick="addUrl()">＋ リンクを追加</button>
+    </div>
 
-        function saveImage() {
-            const card = document.getElementById('card');
-            const currentTransform = card.style.transform;
-            card.style.transform = "scale(1)";
-            html2canvas(card, { useCORS: true, scale: 1 }).then(canvas => {
-                const link = document.createElement("a");
-                link.href = canvas.toDataURL("image/png");
-                link.download = "my-profile-card.png";
-                if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
-                    const newWin = window.open("");
-                    newWin.document.write('<div style="text-align:center;padding:20px;"><img src="'+link.href+'" style="width:100%; border-radius:20px;"><p>長押しして保存してください</p></div>');
-                } else { link.click(); }
-                card.style.transform = currentTransform;
-            });
+    <div class="ed-sec">
+        <div class="ed-lbl">テーマ</div>
+        <div class="swatch-row" id="swatches"></div>
+    </div>
+
+    <button class="btn-save" onclick="saveImage()">画像を保存する</button>
+</div>
+
+<div id="preview-wrap">
+    <div id="card" class="th-lime">
+        <div class="cbg cbg-base"></div>
+        <div class="cbg cbg-mesh"></div>
+        <div class="cbg cbg-vignette"></div>
+        <div class="cbg cbg-grain"></div>
+        <div class="cline-top"></div>
+        <div class="card-wm" id="cwm">C</div>
+        <div class="card-body">
+            <div class="card-left">
+                <div class="card-profile">
+                    <img id="out-icon" src="https://unavatar.io/twitter/ankakepizza551" crossorigin="anonymous">
+                    <div>
+                        <div class="out-name"   id="disp-name">ねのーん</div>
+                        <div class="out-handle" id="disp-handle">@ankakepizza551</div>
+                    </div>
+                </div>
+                <div class="card-center">
+                    <div class="out-catch" id="disp-catch"></div>
+                    <div class="out-tags"  id="disp-tags"></div>
+                </div>
+                <div class="card-footer-mark">CREATOR CARD</div>
+            </div>
+            <div class="card-right">
+                <div id="disp-badges"></div>
+                <div id="disp-urls"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let tags   = ['DTM','Web制作'];
+let badges = [{label:'公開作品',value:'24',unit:'曲'}];
+let urls   = [{platform:'YouTube',val:''}];
+const PF = ['YouTube','SoundCloud','ニコニコ','Spotify','X','Website','GitHub','Booth','note','その他'];
+const TH = [
+    {k:'th-lime',  c:'#b8ff57'},{k:'th-cyan',  c:'#40e0ff'},
+    {k:'th-rose',  c:'#ff4fa0'},{k:'th-gold',  c:'#ffc840'},
+    {k:'th-violet',c:'#a060ff'},{k:'th-mono',  c:'#d0d0d0'},
+];
+let curTh = 'th-lime';
+
+window.addEventListener('load', ()=>{ buildSwatches();renderTags();renderBadges();renderUrls();bindInputs();updateCard();setScale(); });
+window.addEventListener('resize', setScale);
+
+function bindInputs(){
+    ['in-name','in-handle','in-catch'].forEach(id=>document.getElementById(id).addEventListener('input',updateCard));
+    document.getElementById('in-catch').addEventListener('input',()=>{
+        const v=document.getElementById('in-catch').value;
+        const el=document.getElementById('cc');
+        el.textContent=`${v.length} / 40`;
+        el.className='char-hint'+(v.length>40?' warn':'');
+        updateCard();
+    });
+}
+
+function renderTags(){
+    const c=document.getElementById('tags-c'); c.innerHTML='';
+    tags.forEach((t,i)=>{
+        const d=document.createElement('div'); d.className='row';
+        d.innerHTML=`<input type="text" value="${e(t)}" placeholder="例: DTM" oninput="tags[${i}]=this.value;updateCard()"><button class="btn-rm" onclick="removeTag(${i})">×</button>`;
+        c.appendChild(d);
+    });
+}
+function addTag(){ tags.push(''); renderTags(); updateCard(); }
+function removeTag(i){ tags.splice(i,1); renderTags(); updateCard(); }
+
+function renderBadges(){
+    const c=document.getElementById('badges-c'); c.innerHTML='';
+    badges.forEach((b,i)=>{
+        const d=document.createElement('div'); d.className='row';
+        d.innerHTML=`<input type="text" value="${e(b.label)}" placeholder="ラベル" style="flex:2" oninput="badges[${i}].label=this.value;updateCard()"><input type="text" value="${e(b.value)}" placeholder="数値" style="flex:1" oninput="badges[${i}].value=this.value;updateCard()"><input type="text" value="${e(b.unit)}" placeholder="単位" style="flex:1" oninput="badges[${i}].unit=this.value;updateCard()"><button class="btn-rm" onclick="removeBadge(${i})">×</button>`;
+        c.appendChild(d);
+    });
+    document.getElementById('btn-add-badge').style.display=badges.length>=3?'none':'';
+}
+function addBadge(){ if(badges.length<3){badges.push({label:'',value:'',unit:''});renderBadges();updateCard();} }
+function removeBadge(i){ badges.splice(i,1); renderBadges(); updateCard(); }
+
+function renderUrls(){
+    const c=document.getElementById('urls-c'); c.innerHTML='';
+    urls.forEach((u,i)=>{
+        const d=document.createElement('div'); d.className='row';
+        const opts=PF.map(p=>`<option${p===u.platform?' selected':''}>${p}</option>`).join('');
+        d.innerHTML=`<select style="flex:0 0 130px" onchange="urls[${i}].platform=this.value;updateCard()">${opts}</select><input type="text" value="${e(u.val)}" placeholder="URL" oninput="urls[${i}].val=this.value;updateCard()"><button class="btn-rm" onclick="removeUrl(${i})">×</button>`;
+        c.appendChild(d);
+    });
+}
+function addUrl(){ urls.push({platform:'Website',val:''}); renderUrls(); updateCard(); }
+function removeUrl(i){ urls.splice(i,1); renderUrls(); updateCard(); }
+
+function buildSwatches(){
+    const r=document.getElementById('swatches');
+    TH.forEach(t=>{
+        const el=document.createElement('div');
+        el.className='swatch'+(t.k===curTh?' active':'');
+        el.style.background=t.c;
+        el.style.boxShadow=`0 0 8px ${t.c}66`;
+        el.onclick=()=>applyTheme(t.k);
+        r.appendChild(el);
+    });
+}
+function applyTheme(k){
+    curTh=k;
+    const card=document.getElementById('card');
+    TH.forEach(t=>card.classList.remove(t.k));
+    card.classList.add(k);
+    document.querySelectorAll('.swatch').forEach((el,i)=>el.classList.toggle('active',TH[i].k===k));
+}
+
+function updateCard(){
+    const name=document.getElementById('in-name').value;
+    document.getElementById('disp-name').textContent  =name;
+    document.getElementById('disp-handle').textContent=document.getElementById('in-handle').value;
+    document.getElementById('disp-catch').textContent =document.getElementById('in-catch').value;
+    document.getElementById('cwm').textContent=(name.trim()[0]||'C').toUpperCase();
+    document.getElementById('disp-tags').innerHTML=tags.filter(t=>t.trim()).map(t=>`<span class="out-tag">${t}</span>`).join('');
+    document.getElementById('disp-badges').innerHTML=badges.filter(b=>b.label||b.value).map(b=>`<div class="badge"><div class="badge-lbl">${b.label}</div><div class="badge-val">${b.value}<span class="badge-unit">${b.unit}</span></div></div>`).join('');
+    document.getElementById('disp-urls').innerHTML=urls.filter(u=>u.val).map(u=>`<div class="url-row"><div class="url-plat">${u.platform}</div><div class="url-sep"></div><div class="url-val">${u.val}</div></div>`).join('');
+}
+
+function loadIcon(){
+    const id=document.getElementById('in-xid').value.trim();
+    if(!id)return;
+    const img=document.getElementById('out-icon');
+    img.crossOrigin='anonymous';
+    img.src=`https://unavatar.io/twitter/${id}?cb=${Date.now()}`;
+}
+
+function setScale(){
+    const wrap=document.getElementById('preview-wrap');
+    const card=document.getElementById('card');
+    const scale=Math.min((wrap.offsetWidth-40)/1600,1);
+    card.style.transform=`scale(${scale})`;
+    wrap.style.height=(900*scale+56)+'px';
+}
+
+function saveImage(){
+    const card=document.getElementById('card');
+    const prev=card.style.transform;
+    card.style.transform='scale(1)';
+    html2canvas(card,{useCORS:true,scale:1,backgroundColor:null,logging:false}).then(canvas=>{
+        const url=canvas.toDataURL('image/png');
+        card.style.transform=prev;
+        if(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)){
+            const w=window.open('');
+            w.document.write(`<!DOCTYPE html><html><body style="margin:0;background:#000;display:flex;flex-direction:column;align-items:center;padding:20px"><img src="${url}" style="width:100%;border-radius:12px;max-width:600px"><p style="color:#666;margin-top:14px;font-family:sans-serif;font-size:13px">長押しして保存してください</p></body></html>`);
+        } else {
+            const a=document.createElement('a'); a.href=url; a.download='creator-card.png'; a.click();
         }
-    </script>
+    });
+}
+
+function e(s){ return (s||'').replace(/"/g,'&quot;'); }
+</script>
 </body>
 </html>
