@@ -371,6 +371,56 @@
         .th-gold   { --cb:#100d06; --cm1:rgba(255,180,0,.2);   --cm2:rgba(200,100,0,.12);  --cm3:rgba(255,220,80,.08); --ca:#ffc840; }
         .th-violet { --cb:#0a080f; --cm1:rgba(140,60,255,.2);  --cm2:rgba(60,0,200,.12);   --cm3:rgba(255,60,200,.1);  --ca:#a060ff; }
         .th-mono   { --cb:#080808; --cm1:rgba(160,160,160,.1); --cm2:rgba(80,80,80,.08);   --cm3:rgba(200,200,200,.05);--ca:#d0d0d0; }
+        /* Tweet box */
+        #tweet-box {
+            width: 100%;
+            max-width: 600px;
+            background: var(--surf);
+            border: 1px solid var(--bord);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+        .tweet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 18px;
+            border-bottom: 1px solid var(--bord);
+        }
+        #tweet-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        #btn-copy {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            background: transparent;
+            border: 1px solid var(--bord);
+            border-radius: 6px;
+            color: var(--acc);
+            padding: 5px 14px;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+        #btn-copy:hover { background: var(--acc); color: #080810; }
+        #btn-copy.copied { background: var(--acc); color: #080810; }
+        #tweet-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            line-height: 1.8;
+            color: rgba(255,255,255,0.6);
+            padding: 16px 18px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 0;
+            min-height: 80px;
+        }
     </style>
 </head>
 <body>
@@ -423,6 +473,14 @@
     </div>
 
     <button class="btn-save" onclick="saveImage()">画像を保存する</button>
+</div>
+
+<div id="tweet-box">
+    <div class="tweet-header">
+        <span id="tweet-label">ツイート用テキスト</span>
+        <button id="btn-copy" onclick="copyTweet()">コピー</button>
+    </div>
+    <pre id="tweet-text"></pre>
 </div>
 
 <div id="preview-wrap">
@@ -545,6 +603,7 @@ function updateCard(){
     document.getElementById('disp-tags').innerHTML=tags.filter(t=>t.trim()).map(t=>`<span class="out-tag">${t}</span>`).join('');
     document.getElementById('disp-badges').innerHTML=badges.filter(b=>b.label||b.value).map(b=>`<div class="badge"><div class="badge-lbl">${b.label}</div><div class="badge-val">${b.value}<span class="badge-unit">${b.unit}</span></div></div>`).join('');
     document.getElementById('disp-urls').innerHTML=urls.filter(u=>u.val).map(u=>`<div class="url-row"><div class="url-plat">${u.platform}</div><div class="url-sep"></div><div class="url-val">${u.val}</div></div>`).join('');
+    updateTweet();
 }
 
 function loadIconFile(input){
@@ -596,6 +655,33 @@ function saveImage(){
         } else {
             const a=document.createElement('a'); a.href=url; a.download='creator-card.png'; a.click();
         }
+    });
+}
+
+function updateTweet(){
+    const name   = document.getElementById('in-name').value;
+    const handle = document.getElementById('in-handle').value;
+    const catch_ = document.getElementById('in-catch').value;
+    const tagList = tags.filter(t=>t.trim());
+    const urlList = urls.filter(u=>u.val.trim());
+
+    let lines = [];
+    if(catch_) lines.push(catch_);
+    lines.push('');
+    urlList.forEach(u => lines.push(`${u.platform}\t${u.val}`));
+    if(urlList.length) lines.push('');
+    if(tagList.length) lines.push(tagList.map(t=>'#'+t.replace(/\s/g,'')).join(' '));
+
+    document.getElementById('tweet-text').textContent = lines.join('\n').trim();
+}
+
+function copyTweet(){
+    const text = document.getElementById('tweet-text').textContent;
+    navigator.clipboard.writeText(text).then(()=>{
+        const btn = document.getElementById('btn-copy');
+        btn.textContent = 'コピーしました';
+        btn.classList.add('copied');
+        setTimeout(()=>{ btn.textContent='コピー'; btn.classList.remove('copied'); }, 2000);
     });
 }
 
